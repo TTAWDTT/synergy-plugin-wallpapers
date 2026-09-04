@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.synergy-plugin.tgz
+*.synergy-plugin.tgz.sig
+.synergy-plugin-ui-*/

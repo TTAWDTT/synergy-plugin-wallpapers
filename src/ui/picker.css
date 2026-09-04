@@ -1,0 +1,203 @@
+/* The wallpaper picker (custom ui.settings component). Scoped under
+ * [data-synergy-wallpapers-picker] so it cannot leak into host styles. */
+
+[data-synergy-wallpapers-picker] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[data-synergy-wallpapers-picker] .swp-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+[data-synergy-wallpapers-picker] .swp-hint {
+  margin: 2px 0 0;
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+[data-synergy-wallpapers-picker] .swp-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+[data-synergy-wallpapers-picker] .swp-current {
+  font-size: 12px;
+  opacity: 0.75;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-synergy-wallpapers-picker] .swp-btn {
+  border: 1px solid var(--border-weaker-base, rgba(128, 128, 128, 0.35));
+  background: var(--surface-raised-base, transparent);
+  color: inherit;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+[data-synergy-wallpapers-picker] .swp-btn:hover {
+  background: var(--surface-raised-base-hover, rgba(128, 128, 128, 0.12));
+}
+
+[data-synergy-wallpapers-picker] .swp-btn-danger:hover {
+  background: var(--surface-critical-weak, rgba(220, 60, 60, 0.15));
+}
+
+[data-synergy-wallpapers-picker] .swp-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+[data-synergy-wallpapers-picker] .swp-search {
+  flex: 1 1 180px;
+  min-width: 160px;
+  border: 1px solid var(--border-weaker-base, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: var(--surface-inset-base, transparent);
+  color: inherit;
+  font-size: 13px;
+}
+
+[data-synergy-wallpapers-picker] .swp-kinds {
+  display: flex;
+  gap: 4px;
+}
+
+[data-synergy-wallpapers-picker] .swp-kind {
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+[data-synergy-wallpapers-picker] .swp-kind-selected {
+  border-color: var(--border-weaker-base, rgba(128, 128, 128, 0.35));
+  background: var(--surface-raised-base, rgba(128, 128, 128, 0.08));
+  opacity: 1;
+}
+
+[data-synergy-wallpapers-picker] .swp-note,
+[data-synergy-wallpapers-picker] .swp-note-error {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+[data-synergy-wallpapers-picker] .swp-note-error {
+  color: var(--text-critical-base, #c0392b);
+}
+
+[data-synergy-wallpapers-picker] .swp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+[data-synergy-wallpapers-picker] .swp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border-weaker-base, rgba(128, 128, 128, 0.35));
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-raised-base, transparent);
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+[data-synergy-wallpapers-picker] .swp-card:hover:not(:disabled) {
+  background: var(--surface-raised-base-hover, rgba(128, 128, 128, 0.12));
+}
+
+[data-synergy-wallpapers-picker] .swp-card-selected {
+  border-color: var(--border-focus-base, #4a90d9);
+  box-shadow: 0 0 0 1px var(--border-focus-base, #4a90d9);
+}
+
+[data-synergy-wallpapers-picker] .swp-card-unsupported {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+[data-synergy-wallpapers-picker] .swp-thumb {
+  display: block;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  background: rgba(128, 128, 128, 0.12);
+}
+
+[data-synergy-wallpapers-picker] .swp-thumb-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-synergy-wallpapers-picker] .swp-thumb-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+[data-synergy-wallpapers-picker] .swp-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 10px;
+}
+
+[data-synergy-wallpapers-picker] .swp-name {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-synergy-wallpapers-picker] .swp-sub {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+[data-synergy-wallpapers-picker] .swp-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 10px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: var(--surface-interactive-selected, rgba(74, 144, 217, 0.9));
+  color: #fff;
+}
+
+[data-synergy-wallpapers-picker] .swp-audio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}

@@ -1,0 +1,20 @@
+/* The wallpaper background stage: fixed behind everything, pointer-transparent,
+ * clipping the media to the viewport. Bundled into the plugin UI stylesheet
+ * the host injects (ui/index.css). */
+
+[data-synergy-wallpaper-layer] {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+[data-synergy-wallpaper-layer] > video,
+[data-synergy-wallpaper-layer] > iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
+}
