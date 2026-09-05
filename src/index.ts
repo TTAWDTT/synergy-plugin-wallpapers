@@ -5,12 +5,12 @@
  * Workshop + bundled projects), serves its media over a loopback HTTP server
  * run inside this process, exposes the roster through a UI-exposed query
  * operation, and persists the selection through declarative plugin settings.
- * The trusted settings component is the picker and mounts the background
- * layer in the Web UI. Only Synergy's own Web UI background changes — the
+ * The trusted settings component previews choices; the app.footer component
+ * owns saved playback. Only Synergy's own Web UI background changes — the
  * Windows desktop wallpaper is never touched.
  */
 
-import { definePlugin, operation, settings, capability } from "@ericsanchezok/synergy-plugin"
+import { definePlugin, operation, settings, slot, capability } from "@ericsanchezok/synergy-plugin"
 import z from "zod"
 import type { PluginActivationContext } from "@ericsanchezok/synergy-plugin"
 import { DEFAULT_INSTALL_CONFIG, resolveInstall, scanRoster, type WallpaperInstallConfig } from "./server/roster.ts"
@@ -56,7 +56,7 @@ const RosterOutput = z.object({
 export default definePlugin({
   id: "synergy-wallpapers",
   name: "Synergy Wallpapers",
-  version: "0.1.0",
+  version: "0.3.1",
   description:
     "Dress Synergy's Web UI background with Wallpaper Engine wallpapers (the Windows desktop wallpaper is untouched)",
   author: "TTAWDTT",
@@ -64,8 +64,31 @@ export default definePlugin({
   license: "MIT",
   icon: "./assets/icon.svg",
   keywords: ["wallpaper", "wallpaper engine", "background", "steam", "appearance"],
-  capabilities: [capability("settings.read"), capability("settings.write")],
+  capabilities: [capability("settings.read"), capability("settings.write"), capability("ui.resources")],
   contributions: [
+    operation({
+      id: "wallpapers.resource",
+      type: "query",
+      expose: ["ui"],
+      requires: ["ui.resources"],
+      input: z.object({ path: z.string().min(1), search: z.string().optional() }),
+      output: z.object({ url: z.string() }),
+      handler: async (input) => {
+        if (!media) throw new Error("Wallpaper media service is not ready")
+        const parts = input.path.split("/")
+        if (parts[0] !== "wallpapers" || !["workshop", "bundled"].includes(parts[1] ?? "") || parts.length < 4)
+          throw new Error("Unknown wallpaper resource")
+        if (parts.some((part) => !part || part === "." || part === ".." || part.includes("\\") || part.includes(":")))
+          throw new Error("Invalid wallpaper resource path")
+        return { url: `${media.url}/${parts.map(encodeURIComponent).join("/")}${input.search ?? ""}` }
+      },
+    }),
+    slot({
+      id: "wallpaper-background",
+      slot: "app.footer",
+      label: "Wallpaper background",
+      component: { source: "./src/ui/background.ts" },
+    }),
     operation({
       id: "wallpapers.roster",
       type: "query",
@@ -73,7 +96,7 @@ export default definePlugin({
       input: RosterInput,
       output: RosterOutput,
       handler: async (_input, context): Promise<WallpaperRoster & { mediaBase: string }> => {
-        if (context.settings) {
+        if (context.settings?.get) {
           try {
             const values = await context.settings.get()
             installConfig = {
@@ -93,10 +116,11 @@ export default definePlugin({
             installConfig = DEFAULT_INSTALL_CONFIG
           }
         }
-        const roster = await scanRoster(media?.url ?? "", installConfig)
+        const resourceBase = `/plugin/resources/${[context.scopeId, "synergy-wallpapers", context.runtime.pluginGeneration, "wallpapers.resource"].map(encodeURIComponent).join("/")}`
+        const roster = await scanRoster(resourceBase, installConfig)
         const resolved = await resolveInstall(installConfig)
         mediaRoots = { workshop: resolved.workshop, bundled: resolved.bundled }
-        return { ...roster, mediaBase: media?.url ?? "" }
+        return { ...roster, mediaBase: resourceBase }
       },
     }),
     settings({
@@ -104,28 +128,6 @@ export default definePlugin({
       label: "Wallpaper",
       group: "appearance",
       component: { source: "./src/ui/settings.tsx" },
-      formSchema: {
-        type: "object",
-        properties: {
-          steamLibraryRoots: {
-            type: "string",
-            title: "Steam library roots",
-            description:
-              "Semicolon-separated Steam library roots holding steamapps/libraryfolders.vdf. Empty detects automatically (Windows registry, standard locations).",
-            default: "",
-          },
-          appId: {
-            type: "string",
-            title: "Wallpaper Engine app id",
-            default: "431960",
-          },
-          bundledProjectsSubPath: {
-            type: "string",
-            title: "Bundled projects subpath",
-            default: "projects/defaultprojects",
-          },
-        },
-      },
     }),
   ],
   async activate(context: PluginActivationContext) {

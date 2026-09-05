@@ -1,203 +1,79 @@
-/* The wallpaper picker (custom ui.settings component). Scoped under
- * [data-synergy-wallpapers-picker] so it cannot leak into host styles. */
-
 [data-synergy-wallpapers-picker] {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  --swp-border: var(--border-weaker-base, #8884);
+  --swp-surface: var(--surface-raised-base, #8881);
+  --swp-accent: var(--text-interactive-base, #82aaff);
+  display: flex; flex-direction: column; gap: 16px; width: 100%; min-width: 0; padding: 24px; color: var(--text-base, inherit);
 }
-
-[data-synergy-wallpapers-picker] .swp-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-[data-synergy-wallpapers-picker] .swp-hint {
-  margin: 2px 0 0;
-  opacity: 0.7;
-  font-size: 12px;
-}
-
-[data-synergy-wallpapers-picker] .swp-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-[data-synergy-wallpapers-picker] .swp-current {
-  font-size: 12px;
-  opacity: 0.75;
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-synergy-wallpapers-picker] .swp-btn {
-  border: 1px solid var(--border-weaker-base, rgba(128, 128, 128, 0.35));
-  background: var(--surface-raised-base, transparent);
-  color: inherit;
-  border-radius: 8px;
-  padding: 4px 12px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-[data-synergy-wallpapers-picker] .swp-btn:hover {
-  background: var(--surface-raised-base-hover, rgba(128, 128, 128, 0.12));
-}
-
-[data-synergy-wallpapers-picker] .swp-btn-danger:hover {
-  background: var(--surface-critical-weak, rgba(220, 60, 60, 0.15));
-}
-
-[data-synergy-wallpapers-picker] .swp-toolbar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-[data-synergy-wallpapers-picker] .swp-search {
-  flex: 1 1 180px;
-  min-width: 160px;
-  border: 1px solid var(--border-weaker-base, rgba(128, 128, 128, 0.35));
-  border-radius: 8px;
-  padding: 6px 10px;
-  background: var(--surface-inset-base, transparent);
-  color: inherit;
-  font-size: 13px;
-}
-
-[data-synergy-wallpapers-picker] .swp-kinds {
-  display: flex;
-  gap: 4px;
-}
-
-[data-synergy-wallpapers-picker] .swp-kind {
-  border: 1px solid transparent;
-  background: transparent;
-  color: inherit;
-  border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 12px;
-  cursor: pointer;
-  opacity: 0.75;
-}
-
-[data-synergy-wallpapers-picker] .swp-kind-selected {
-  border-color: var(--border-weaker-base, rgba(128, 128, 128, 0.35));
-  background: var(--surface-raised-base, rgba(128, 128, 128, 0.08));
-  opacity: 1;
-}
-
-[data-synergy-wallpapers-picker] .swp-note,
-[data-synergy-wallpapers-picker] .swp-note-error {
-  font-size: 13px;
-  opacity: 0.8;
-}
-
-[data-synergy-wallpapers-picker] .swp-note-error {
-  color: var(--text-critical-base, #c0392b);
-}
-
-[data-synergy-wallpapers-picker] .swp-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-  max-height: 380px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-[data-synergy-wallpapers-picker] .swp-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border: 1px solid var(--border-weaker-base, rgba(128, 128, 128, 0.35));
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--surface-raised-base, transparent);
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-}
-
-[data-synergy-wallpapers-picker] .swp-card:hover:not(:disabled) {
-  background: var(--surface-raised-base-hover, rgba(128, 128, 128, 0.12));
-}
-
-[data-synergy-wallpapers-picker] .swp-card-selected {
-  border-color: var(--border-focus-base, #4a90d9);
-  box-shadow: 0 0 0 1px var(--border-focus-base, #4a90d9);
-}
-
-[data-synergy-wallpapers-picker] .swp-card-unsupported {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-[data-synergy-wallpapers-picker] .swp-thumb {
-  display: block;
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  overflow: hidden;
-  background: rgba(128, 128, 128, 0.12);
-}
-
-[data-synergy-wallpapers-picker] .swp-thumb-image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-[data-synergy-wallpapers-picker] .swp-thumb-fallback {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-[data-synergy-wallpapers-picker] .swp-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px 10px;
-}
-
-[data-synergy-wallpapers-picker] .swp-name {
-  font-size: 12px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-synergy-wallpapers-picker] .swp-sub {
-  font-size: 11px;
-  opacity: 0.65;
-}
-
-[data-synergy-wallpapers-picker] .swp-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  font-size: 10px;
-  border-radius: 999px;
-  padding: 2px 8px;
-  background: var(--surface-interactive-selected, rgba(74, 144, 217, 0.9));
-  color: #fff;
-}
-
-[data-synergy-wallpapers-picker] .swp-audio {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
+[data-synergy-wallpapers-picker] * { box-sizing: border-box; }
+[data-synergy-wallpapers-picker] .swp-library { display:flex; flex-direction:column; gap:14px; min-width:0; }
+[data-synergy-wallpapers-picker] .swp-tabs { display:flex; gap:22px; border-bottom:1px solid var(--swp-border); }
+[data-synergy-wallpapers-picker] .swp-tabs button { padding:9px 1px 11px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--text-weak,inherit); font:inherit; font-size:13px; cursor:pointer; }
+[data-synergy-wallpapers-picker] .swp-tabs button[aria-selected="true"] { border-bottom-color:var(--swp-accent); color:var(--text-strong,inherit); font-weight:600; }
+[data-synergy-wallpapers-picker] .swp-appearance { display:flex; flex-direction:column; gap:18px; }
+[data-synergy-wallpapers-picker] .swp-section-heading h3 { margin:0 0 5px; font-size:15px; font-weight:600; color:var(--text-strong,inherit); }
+[data-synergy-wallpapers-picker] .swp-section-heading p { margin:0; font-size:12px; line-height:1.7; color:var(--text-weak,inherit); }
+[data-synergy-wallpapers-picker] .swp-presets { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+[data-synergy-wallpapers-picker] .swp-preset { display:flex; flex-direction:column; gap:6px; text-align:left; padding:14px; border:1px solid var(--swp-border); border-radius:10px; background:var(--swp-surface); color:inherit; cursor:pointer; }
+[data-synergy-wallpapers-picker] .swp-preset[aria-pressed="true"] { border-color:var(--swp-accent); box-shadow:inset 0 0 0 1px var(--swp-accent); }
+[data-synergy-wallpapers-picker] .swp-preset strong { font-size:13px; color:var(--text-strong,inherit); }
+[data-synergy-wallpapers-picker] .swp-preset span { font-size:11px; color:var(--text-weak,inherit); line-height:1.5; }
+[data-synergy-wallpapers-picker] .swp-tint-toggle { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px; border-radius:10px; background:var(--swp-surface); border:1px solid var(--swp-border); cursor:pointer; }
+[data-synergy-wallpapers-picker] .swp-tint-toggle > span, [data-synergy-wallpapers-picker] .swp-adjustment-copy { display:flex; flex-direction:column; gap:5px; }
+[data-synergy-wallpapers-picker] .swp-tint-toggle strong, [data-synergy-wallpapers-picker] .swp-adjustment strong { font-size:12px; font-weight:550; color:var(--text-strong,inherit); }
+[data-synergy-wallpapers-picker] .swp-tint-toggle small, [data-synergy-wallpapers-picker] .swp-adjustment small { font-size:11px; color:var(--text-weak,inherit); line-height:1.5; }
+[data-synergy-wallpapers-picker] .swp-tint-toggle input { width:17px; height:17px; accent-color:var(--swp-accent); flex-shrink:0; }
+[data-synergy-wallpapers-picker] .swp-adjustments { display:flex; flex-direction:column; }
+[data-synergy-wallpapers-picker] .swp-adjustment { display:flex; align-items:center; justify-content:space-between; gap:22px; padding:13px 0; border-bottom:1px solid var(--swp-border); }
+[data-synergy-wallpapers-picker] .swp-range-control { display:flex; align-items:center; gap:12px; flex:0 0 40%; min-width:140px; }
+[data-synergy-wallpapers-picker] .swp-range-control input { min-width:0; width:100%; accent-color:var(--swp-accent); cursor:pointer; }
+[data-synergy-wallpapers-picker] .swp-range-control output { width:42px; text-align:right; flex-shrink:0; font-size:12px; font-variant-numeric:tabular-nums; }
+[data-synergy-wallpapers-picker] .swp-appearance-note { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:11px; line-height:1.6; color:var(--text-weak,inherit); }
+[data-synergy-wallpapers-picker] .swp-header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+[data-synergy-wallpapers-picker] .swp-title { margin:0; font-size:23px; line-height:1.35; font-weight:650; letter-spacing:-.5px; color:var(--text-strong, inherit); }
+[data-synergy-wallpapers-picker] .swp-description { margin:6px 0 0; font-size:12px; line-height:1.6; color:var(--text-weak, inherit); }
+[data-synergy-wallpapers-picker] .swp-button { display:inline-flex; justify-content:center; align-items:center; flex-shrink:0; min-height:32px; padding:6px 12px; border:1px solid var(--swp-border); border-radius:8px; background:var(--swp-surface); color:inherit; font:inherit; font-size:12px; cursor:pointer; }
+[data-synergy-wallpapers-picker] .swp-button:hover:not(:disabled) { background:var(--surface-raised-base-hover,#8882); }
+[data-synergy-wallpapers-picker] button:disabled { opacity:.48; cursor:not-allowed; }
+[data-synergy-wallpapers-picker] button:focus-visible, [data-synergy-wallpapers-picker] input:focus-visible { outline:2px solid var(--swp-accent); outline-offset:3px; }
+[data-synergy-wallpapers-picker] .swp-current-panel { display:flex; align-items:center; gap:14px; padding:12px; border:1px solid var(--swp-border); border-radius:12px; background:var(--swp-surface); }
+[data-synergy-wallpapers-picker] .swp-current-image { width:108px; height:64px; flex-shrink:0; border-radius:7px; overflow:hidden; display:grid; place-items:center; background:#8882; font-size:28px; color:var(--text-weak,inherit); }
+[data-synergy-wallpapers-picker] .swp-current-image img { width:100%; height:100%; object-fit:cover; }
+[data-synergy-wallpapers-picker] .swp-current-copy { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+[data-synergy-wallpapers-picker] .swp-eyebrow { font-size:10px; color:var(--text-weak,inherit); }
+[data-synergy-wallpapers-picker] .swp-current-copy strong { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-strong,inherit); }
+[data-synergy-wallpapers-picker] .swp-playback { font-size:11px; color:var(--text-weak,inherit); line-height:1.4; }
+[data-synergy-wallpapers-picker] .swp-playback-error { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:var(--text-critical-base,#e48c8c); }
+[data-synergy-wallpapers-picker] .swp-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+[data-synergy-wallpapers-picker] .swp-search-wrap { min-width:170px; flex:1; display:flex; align-items:center; gap:7px; padding:0 11px; border:1px solid var(--swp-border); border-radius:9px; background:var(--surface-inset-base,#8881); }
+[data-synergy-wallpapers-picker] .swp-search-wrap > span { font-size:21px; opacity:.65; }
+[data-synergy-wallpapers-picker] .swp-search { width:100%; min-width:0; height:36px; padding:0; border:0; outline:0; color:inherit; background:transparent; font-size:12px; }
+[data-synergy-wallpapers-picker] .swp-filters { display:flex; gap:3px; padding:3px; border:1px solid var(--swp-border); border-radius:9px; }
+[data-synergy-wallpapers-picker] .swp-filter { border:0; border-radius:6px; padding:6px 10px; color:var(--text-weak,inherit); background:transparent; font-size:12px; cursor:pointer; white-space:nowrap; }
+[data-synergy-wallpapers-picker] .swp-filter[aria-pressed="true"] { color:var(--text-strong,inherit); background:var(--surface-raised-base-hover,#8883); }
+[data-synergy-wallpapers-picker] .swp-library-meta { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:11px; color:var(--text-weak,inherit); }
+[data-synergy-wallpapers-picker] .swp-check { display:flex; align-items:center; gap:7px; font-size:11px; cursor:pointer; }
+[data-synergy-wallpapers-picker] .swp-check input { accent-color:var(--swp-accent); margin:0; width:13px; height:13px; }
+[data-synergy-wallpapers-picker] .swp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr)); align-content:start; gap:12px; max-height:clamp(280px,48vh,600px); overflow:auto; padding:3px; scrollbar-gutter:stable; }
+[data-synergy-wallpapers-picker] .swp-card { position:relative; min-width:0; display:flex; flex-direction:column; padding:0; border:1px solid var(--swp-border); border-radius:10px; overflow:hidden; color:inherit; background:var(--swp-surface); text-align:left; cursor:pointer; transition:border-color .15s,background .15s; }
+[data-synergy-wallpapers-picker] .swp-card:hover:not(:disabled) { border-color:var(--swp-accent); background:var(--surface-raised-base-hover,#8882); }
+[data-synergy-wallpapers-picker] .swp-card[aria-pressed="true"] { border-color:var(--swp-accent); box-shadow:0 0 0 1px var(--swp-accent); }
+[data-synergy-wallpapers-picker] .swp-thumb { position:relative; display:block; width:100%; aspect-ratio:16/9; overflow:hidden; background:#8882; }
+[data-synergy-wallpapers-picker] .swp-thumb-placeholder { position:absolute; inset:0; display:grid; place-items:center; opacity:.3; font-size:28px; }
+[data-synergy-wallpapers-picker] .swp-thumb-image { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; }
+[data-synergy-wallpapers-picker] .swp-type { position:absolute; left:7px; bottom:7px; padding:2px 6px; border-radius:4px; background:#111a; color:white; font-size:10px; }
+[data-synergy-wallpapers-picker] .swp-selected-mark { position:absolute; right:7px; top:7px; display:grid; place-items:center; width:21px; height:21px; border-radius:50%; background:var(--swp-accent); color:#111; font-size:13px; font-weight:700; }
+[data-synergy-wallpapers-picker] .swp-card-copy { display:flex; flex-direction:column; gap:5px; padding:9px 10px; }
+[data-synergy-wallpapers-picker] .swp-name { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; height:34px; font-size:12px; line-height:17px; font-weight:550; }
+[data-synergy-wallpapers-picker] .swp-source { color:var(--text-weak,inherit); font-size:10px; }
+[data-synergy-wallpapers-picker] .swp-error { display:flex; align-items:center; gap:12px; justify-content:space-between; border:1px solid #db68684d; border-radius:9px; background:#db68680a; color:var(--text-critical-base,#db8c8c); padding:10px 12px; font-size:12px; line-height:1.6; }
+[data-synergy-wallpapers-picker] .swp-empty { display:grid; place-items:center; min-height:140px; padding:24px; color:var(--text-weak,inherit); font-size:13px; text-align:center; }
+[data-synergy-wallpapers-picker] .swp-more { align-self:center; }
+[data-synergy-wallpapers-picker] .swp-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:12px; border-top:1px solid var(--swp-border); color:var(--text-weak,inherit); font-size:11px; line-height:1.5; }
+@media(max-width:560px) {
+  [data-synergy-wallpapers-picker] .swp-presets { grid-template-columns:1fr; }
+  [data-synergy-wallpapers-picker] .swp-adjustment, [data-synergy-wallpapers-picker] .swp-appearance-note { align-items:stretch; flex-direction:column; gap:10px; }
+  [data-synergy-wallpapers-picker] { padding:16px; }
+  [data-synergy-wallpapers-picker] .swp-current-image { width:72px; height:48px; }
+  [data-synergy-wallpapers-picker] .swp-current-panel { gap:9px; }
+  [data-synergy-wallpapers-picker] .swp-library-meta { flex-wrap:wrap; }
 }

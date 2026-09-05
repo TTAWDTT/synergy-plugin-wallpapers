@@ -1,6 +1,99 @@
-/* The wallpaper background stage: fixed behind everything, pointer-transparent,
- * clipping the media to the viewport. Bundled into the plugin UI stylesheet
- * the host injects (ui/index.css). */
+html[data-synergy-wallpaper-active] {
+  background-color: transparent;
+  --swp-fusion-opacity: 76%;
+  --swp-fusion-glass-blur: 16px;
+  --swp-fusion-wallpaper-blur: 0px;
+  --swp-fusion-veil: 28%;
+  --swp-fusion-accent: rgb(112, 128, 144);
+  --swp-fusion-tint: 14%;
+  --swp-fusion-color: color-mix(in srgb, var(--background-base) calc(100% - var(--swp-fusion-tint)), var(--swp-fusion-accent));
+  --swp-fusion-panel: color-mix(in srgb, var(--swp-fusion-color) var(--swp-fusion-opacity), transparent);
+  --swp-fusion-card: color-mix(in srgb, var(--swp-fusion-color) min(96%, calc(var(--swp-fusion-opacity) + 12%)), transparent);
+  --swp-fusion-popover: color-mix(in srgb, var(--swp-fusion-color) 96%, transparent);
+  --swp-fusion-border: color-mix(in srgb, var(--border-base) 66%, var(--swp-fusion-accent) 34%);
+  --swp-fusion-hover: color-mix(in srgb, var(--surface-raised-base-hover) 88%, var(--swp-fusion-accent) 12%);
+  --swp-fusion-shadow: 0 8px 28px color-mix(in srgb, var(--background-stronger) 16%, transparent);
+  --swp-fusion-highlight: rgba(255, 255, 255, .24);
+}
+
+html[data-synergy-wallpaper-active][data-color-scheme="dark"] {
+  --swp-fusion-highlight: rgba(255, 255, 255, .05);
+}
+
+html[data-synergy-wallpaper-active] body {
+  isolation: isolate;
+  background-color: transparent;
+}
+
+html[data-synergy-wallpaper-active] #root {
+  position: relative;
+  z-index: 0;
+  background-color: transparent;
+}
+
+html[data-synergy-wallpaper-active] .synergy-workbench-canvas {
+  --workbench-canvas-bg: transparent;
+  --workbench-panel-bg: var(--swp-fusion-panel);
+  --workbench-panel-bg-hover: var(--swp-fusion-hover);
+  --workbench-card-bg: var(--swp-fusion-card);
+  --workbench-card-bg-hover: var(--swp-fusion-hover);
+  --workbench-card-secondary-bg: var(--swp-fusion-panel);
+  --workbench-row-bg: color-mix(in srgb, var(--swp-fusion-color) 48%, transparent);
+  --workbench-row-bg-hover: var(--swp-fusion-hover);
+  --workbench-control-bg: var(--swp-fusion-card);
+  --workbench-control-bg-hover: var(--swp-fusion-hover);
+  --workbench-input-bg: var(--swp-fusion-card);
+  --workbench-input-bg-hover: var(--swp-fusion-hover);
+  --workbench-popover-bg: var(--swp-fusion-popover);
+  --workbench-border: var(--swp-fusion-border);
+}
+
+html[data-synergy-wallpaper-active] .session-workbench-pane {
+  background-color: color-mix(in srgb, var(--swp-fusion-color) 18%, transparent);
+}
+
+html[data-synergy-wallpaper-active] :is(.sb-root, .stb-root, .desktop-window-chrome, .desktop-native-titlebar, .workbench-surface-panel) {
+  background: var(--swp-fusion-panel);
+  border-color: var(--swp-fusion-border);
+  backdrop-filter: blur(var(--swp-fusion-glass-blur)) saturate(1.12);
+}
+
+html[data-synergy-wallpaper-active] .prompt-input-shell {
+  background: var(--swp-fusion-card);
+  border-color: var(--swp-fusion-border);
+  backdrop-filter: blur(var(--swp-fusion-glass-blur)) saturate(1.12);
+  box-shadow: inset 0 1px 0 var(--swp-fusion-highlight), var(--swp-fusion-shadow);
+}
+
+html[data-synergy-wallpaper-active] :is([data-component="popover-content"], .sidebar-account-menu) {
+  background: var(--swp-fusion-popover);
+  border-color: var(--swp-fusion-border);
+}
+
+html[data-synergy-wallpaper-active] [data-synergy-wallpapers-picker] {
+  --swp-border: var(--swp-fusion-border);
+  --swp-surface: var(--swp-fusion-card);
+}
+
+html[data-synergy-wallpaper-active] [data-component="dialog"] [data-slot="dialog-content"].settings-dialog-panel {
+  background: var(--swp-fusion-popover);
+  border-color: var(--swp-fusion-border);
+  backdrop-filter: blur(var(--swp-fusion-glass-blur));
+}
+
+html[data-synergy-wallpaper-active] .settings-panel-frame {
+  --settings-canvas-bg: transparent;
+  --settings-panel-bg: var(--swp-fusion-panel);
+  --settings-card-bg: var(--swp-fusion-card);
+  --settings-card-bg-hover: var(--swp-fusion-hover);
+  --settings-card-secondary-bg: var(--swp-fusion-panel);
+  --settings-control-bg: var(--swp-fusion-card);
+  --settings-control-bg-hover: var(--swp-fusion-hover);
+  --settings-input-bg: var(--swp-fusion-card);
+  --settings-input-bg-hover: var(--swp-fusion-hover);
+  --settings-popover-bg: var(--swp-fusion-popover);
+  --settings-border: var(--swp-fusion-border);
+}
 
 [data-synergy-wallpaper-layer] {
   position: fixed;
@@ -17,4 +110,32 @@
   height: 100%;
   border: none;
   object-fit: cover;
+  filter: blur(var(--swp-fusion-wallpaper-blur, 0px));
+  transform: scale(1.025);
+}
+
+[data-synergy-wallpaper-layer]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--background-stronger) var(--swp-fusion-veil, 28%), transparent);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-synergy-wallpaper-active] {
+    --swp-fusion-panel: var(--swp-fusion-color);
+    --swp-fusion-card: var(--swp-fusion-color);
+    --swp-fusion-popover: var(--swp-fusion-color);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-synergy-wallpaper-active] {
+    --swp-fusion-color: Canvas;
+    --swp-fusion-panel: Canvas;
+    --swp-fusion-card: Canvas;
+    --swp-fusion-popover: Canvas;
+    --swp-fusion-border: CanvasText;
+  }
 }

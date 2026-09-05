@@ -4,7 +4,7 @@
  * same-origin user HTML its full origin privileges back. Ported from the dsh
  * wallpapers plugin's hardening suite, with jsdom standing in for the DOM.
  */
-import { describe, test, expect, beforeEach, afterEach } from "bun:test"
+import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test"
 import { mountWallpaperLayer, WEB_LOAD_TIMEOUT_MS } from "../src/ui/wallpaper-layer.ts"
 import type { WallpaperSummary } from "../src/server/types.ts"
 
@@ -52,10 +52,22 @@ function makeDocument(): { document: Record<string, unknown>; layers: RecordedEl
         element.removed = true
       },
     }
+    if (tag === "video") {
+      Object.setPrototypeOf(element, HTMLVideoElement.prototype)
+      Object.assign(element, {
+        paused: false,
+        reloaded: false,
+        play: () => Promise.resolve(),
+        pause() { Object.assign(element, { paused: true }) },
+        load() { Object.assign(element, { reloaded: true }) },
+        removeAttribute(name: string) { Reflect.deleteProperty(element, name) },
+      })
+    }
     return element
   }
   const fakeDocument = {
     createElement,
+    defaultView: new EventTarget(),
     body: {
       appendChild(node: RecordedElement) {
         node.appended = true
@@ -138,5 +150,62 @@ describe("web wallpaper iframe sandbox", () => {
 
   test("the load watchdog timeout stays 15 seconds", () => {
     expect(WEB_LOAD_TIMEOUT_MS).toBe(15_000)
+  })
+
+  test("web readiness requires a message from the mounted frame and ignores stale messages", () => {
+    const { document, layers } = makeDocument()
+    ;(globalThis as { document?: unknown }).document = document
+    const messages: string[] = []
+    let ready = 0
+    const dispose = mountWallpaperLayer(summary("web", "http://127.0.0.1:1/index.html"), true, (message) => messages.push(message), () => { ready++ })
+    const frame = layers[0]!.children[0]!
+    const frameWindow = {}
+    Object.assign(frame, { contentWindow: frameWindow })
+    const send = (source: unknown, state: string) => {
+      const event = new Event("message")
+      Object.assign(event, { source, data: { source: "synergy-wallpapers", state, message: "Unsupported API" } })
+      ;(document.defaultView as EventTarget).dispatchEvent(event)
+    }
+    for (const listener of frame.listeners.get("load") ?? []) listener()
+    expect(ready).toBe(0)
+    send({}, "ready")
+    expect(ready).toBe(0)
+    send(frameWindow, "ready")
+    expect(ready).toBe(1)
+    send(frameWindow, "error")
+    expect(messages[0]).toContain("Unsupported API")
+    dispose()
+    send(frameWindow, "ready")
+    expect(ready).toBe(1)
+  })
+
+  test("video errors are reported and cleanup stops playback and releases the source", () => {
+    const { document, layers } = makeDocument()
+    ;(globalThis as { document?: unknown }).document = document
+    const messages: string[] = []
+    const dispose = mountWallpaperLayer(summary("video", "http://127.0.0.1:1/missing.mp4"), true, (message) => messages.push(message))
+    const video = layers[0]!.children[0]!
+    for (const listener of video.listeners.get("error") ?? []) listener()
+    expect(messages).toHaveLength(1)
+    dispose()
+    expect((video as unknown as { paused: boolean }).paused).toBe(true)
+    expect((video as unknown as { reloaded: boolean }).reloaded).toBe(true)
+    expect((video as unknown as { src?: string }).src).toBeUndefined()
+    for (const listener of video.listeners.get("error") ?? []) listener()
+    expect(messages).toHaveLength(1)
+  })
+
+  test("disposing a web layer cancels its watchdog", () => {
+    const { document } = makeDocument()
+    ;(globalThis as { document?: unknown }).document = document
+    const clear = spyOn(globalThis, "clearTimeout")
+    try {
+      const dispose = mountWallpaperLayer(summary("web", "http://127.0.0.1:1/test.html"), true)
+      dispose()
+      dispose()
+      expect(clear).toHaveBeenCalledTimes(1)
+    } finally {
+      clear.mockRestore()
+    }
   })
 })

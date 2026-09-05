@@ -1,6 +1,6 @@
 {
   "name": "synergy-wallpapers",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "type": "module",
   "source": "./src/index.ts",
   "scripts": {
@@ -8,7 +8,9 @@
     "validate": "synergy-plugin validate --runtime-discovery",
     "build": "synergy-plugin build",
     "pack": "synergy-plugin pack",
-    "test": "synergy-plugin test"
+    "test": "synergy-plugin test",
+    "test:browser": "bun test/browser-smoke.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ericsanchezok/synergy-plugin": "^3.0.22",
@@ -16,6 +18,7 @@
     "solid-js": "^1.9.0"
   },
   "devDependencies": {
+    "@types/node": "^22.15.30",
     "@ericsanchezok/synergy-plugin-kit": "^3.0.22",
     "typescript": "^5.8.0"
   },

@@ -18,6 +18,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { extname, join, resolve, sep } from "node:path"
 import type { WallpaperSummary } from "./types.ts"
 import { serveFileWithRanges } from "./file-stream.ts"
+import { wallpaperDocument } from "./web-document.ts"
 
 /** MIME types the media routes need. */
 const MIME: Record<string, string> = {
@@ -102,6 +103,13 @@ export function serveMedia(roots: MediaRoots, decoded: string, req: IncomingMess
   if (!target.startsWith(root + sep)) {
     res.writeHead(403)
     res.end()
+    return
+  }
+  if ([".html", ".htm"].includes(extname(target).toLowerCase())) {
+    void wallpaperDocument(target, join(root, id)).then((html) => {
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8", "content-length": Buffer.byteLength(html) })
+      res.end(req.method === "HEAD" ? undefined : html)
+    }).catch(() => { res.writeHead(404); res.end() })
     return
   }
   serveFileWithRanges(req, res, target, MIME[extname(target).toLowerCase()] ?? "application/octet-stream")
