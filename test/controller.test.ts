@@ -10,7 +10,7 @@ const tick = () => new Promise((done) => setTimeout(done, 0))
 
 function fixture(
   initial: Record<string, unknown> = { selection: "workshop:test" },
-  options: { read?: () => Promise<Record<string, unknown>>; query?: () => Promise<WallpaperRoster> } = {},
+  options: { read?: () => Promise<Record<string, unknown>>; query?: () => Promise<WallpaperRoster>; persistence?: { read(): Record<string, unknown>; write(values: Record<string, unknown>): Record<string, unknown> } } = {},
 ) {
   const listeners = new Set<(values: Record<string, unknown>) => void>()
   const mounted: Array<{ url: string | null; muted: boolean; stopped: boolean }> = []
@@ -32,7 +32,7 @@ function fixture(
   const controller = createWallpaperController(context, {
     translucent(value) { active = value },
     mount(summary, muted, onError, onReady) { const layer = { url: summary.entryUrl, muted, stopped: false }; mounted.push(layer); failures.push(onError); failPlayback = onError; onReady(); return () => { layer.stopped = true } },
-  }, appearance)
+  }, appearance, options.persistence ?? { read: () => ({}), write: (values) => values })
   return { controller, mounted, styles, listeners, failures, active: () => active, fail(message: string) { failPlayback(message) }, update(values: Record<string, unknown>) { for (const listener of listeners) listener(values) }, query(next: typeof query) { query = next } }
 }
 
@@ -53,6 +53,14 @@ test("appearance previews and discard never restart the saved video", async () =
   expect(state.styles.size).toBe(0)
 })
 
+test("a new scope inherits the remembered wallpaper when its settings are empty", async () => {
+  const state = fixture({}, { persistence: { read: () => ({ selection: "workshop:test", muted: true }), write: (values) => values } })
+  await tick()
+  expect(state.mounted).toHaveLength(1)
+  expect(state.active()).toBe(true)
+  state.controller.dispose()
+})
+
 test("playback failure and disabled selection remove fusion styles", async () => {
   const state = fixture()
   await tick()
@@ -63,7 +71,7 @@ test("playback failure and disabled selection remove fusion styles", async () =>
   expect(state.styles.size).toBe(0)
   state.controller.retry()
   expect(state.styles.size).toBe(6)
-  state.controller.preview(Symbol(), {}, roster)
+  state.controller.preview(Symbol(), { selection: "" }, roster)
   expect(state.styles.size).toBe(0)
   state.controller.dispose()
 })

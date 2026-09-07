@@ -5,6 +5,7 @@ import type { WallpaperRoster, WallpaperSummary } from "../server/types.ts"
 import { parseSelection } from "../server/types.ts"
 import { acquireWallpaper } from "./wallpaper-controller.ts"
 import { APPEARANCE_PRESETS, DEFAULT_APPEARANCE, readAppearance } from "./appearance.ts"
+import { mergeWallpaperState, readWallpaperState } from "./wallpaper-state.ts"
 import "./wallpaper-layer.css"
 import "./picker.css"
 
@@ -33,9 +34,14 @@ const WallpaperSettings: Component<PluginSettingsComponentProps> = (props) => {
   const unwatchStatus = wallpaper.subscribe(setStatus)
   let disposed = false
   let request = 0
-  const selection = () => typeof props.values.selection === "string" ? props.values.selection : ""
-  const muted = () => props.values.muted !== false
-  const appearance = () => readAppearance(props.values)
+  const remembered = readWallpaperState()
+  const effectiveValues = () => mergeWallpaperState(props.values, remembered)
+  const selection = () => {
+    const value = effectiveValues().selection
+    return typeof value === "string" ? value : ""
+  }
+  const muted = () => effectiveValues().muted !== false
+  const appearance = () => readAppearance(effectiveValues())
   const all = () => roster()?.wallpapers ?? []
   const supportedCount = createMemo(() => all().filter(playable).length)
   const selected = createMemo(() => {

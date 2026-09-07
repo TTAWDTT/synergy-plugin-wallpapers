@@ -56,7 +56,7 @@ const RosterOutput = z.object({
 export default definePlugin({
   id: "synergy-wallpapers",
   name: "Synergy Wallpapers",
-  version: "0.3.1",
+  version: "0.3.2",
   description:
     "Dress Synergy's Web UI background with Wallpaper Engine wallpapers (the Windows desktop wallpaper is untouched)",
   author: "TTAWDTT",

@@ -2,6 +2,7 @@ import type { PluginSurfaceContext } from "@ericsanchezok/synergy-plugin/ui"
 import { parseSelection, type WallpaperRoster, type WallpaperSummary } from "../server/types.ts"
 import { applyTranslucentTokens, mountWallpaperLayer } from "./wallpaper-layer.ts"
 import { createAppearanceController, readAppearance } from "./appearance.ts"
+import { mergeWallpaperState, readWallpaperState, rememberWallpaperState } from "./wallpaper-state.ts"
 
 export type WallpaperPlaybackStatus = { state: "idle" | "loading" | "ready" | "error"; message: string }
 
@@ -10,11 +11,16 @@ type Renderer = {
   translucent(active: boolean): void
   mount(summary: WallpaperSummary, muted: boolean, onError: (message: string) => void, onReady: () => void): () => void
 }
+type WallpaperPersistence = {
+  read(): Values
+  write(values: Values): Values
+}
 
 export function createWallpaperController(
   context: PluginSurfaceContext,
   renderer: Renderer = { translucent: applyTranslucentTokens, mount: mountWallpaperLayer },
   appearance = createAppearanceController(),
+  persistence: WallpaperPersistence = { read: readWallpaperState, write: rememberWallpaperState },
 ) {
   let status: WallpaperPlaybackStatus = { state: "idle", message: "未启用壁纸" }
   const listeners = new Set<(status: WallpaperPlaybackStatus) => void>()
@@ -23,6 +29,7 @@ export function createWallpaperController(
     for (const listener of listeners) listener(next)
   }
   let saved: Values = {}
+  let remembered = persistence.read()
   let roster: WallpaperRoster | undefined
   let disposed = false
   let revision = 0
@@ -35,7 +42,8 @@ export function createWallpaperController(
   function sync() {
     if (disposed) return
     const preview = Array.from(previews.values()).at(-1)
-    const values = preview?.values ?? saved
+    const rawValues = preview?.values ?? saved
+    const values = mergeWallpaperState(rawValues, remembered)
     const available = preview?.roster ?? roster
     const selection = parseSelection(typeof values.selection === "string" ? values.selection : "")
     const selected = selection && available?.wallpapers.find((entry) => entry.id === selection.id && entry.collection === selection.collection)
@@ -85,17 +93,20 @@ export function createWallpaperController(
     }
   }
 
-  const unsubscribe = context.settings.subscribe((values) => {
-    revision++
+  const adoptSaved = (values: Values) => {
+    if (Object.prototype.hasOwnProperty.call(values, "selection")) remembered = persistence.write(values)
     saved = values
     sync()
+  }
+  const unsubscribe = context.settings.subscribe((values) => {
+    revision++
+    adoptSaved(values)
     void refresh()
   })
   const initialRevision = revision
   void context.settings.get().then((values) => {
     if (disposed || revision !== initialRevision) return
-    saved = values
-    sync()
+    adoptSaved(values)
     void refresh()
   }).catch((error) => {
     if (!disposed && revision === initialRevision) report({ state: "error", message: `读取壁纸设置失败：${String(error)}` })
